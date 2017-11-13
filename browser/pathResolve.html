@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="/src/lodash.min.js"></script>
+    <script src="/src/platform.min.js"></script>
+    <script src="/src/benchmark.min.js"></script>
+</head>
+
+<body>
+    <script>
+        //处理路径模式,路径读取都是从右向左的
+        //
+        function spliceOne(list, index) {
+            for (var i = index, k = i + 1, n = list.length; k < n; i += 1, k += 1) {
+                list[i] = list[k];
+            }
+            list.pop();
+        }
+
+        function normalizeArray(parts, allowAboveRoot) {
+            // if the path tries to go above the root, `up` ends up > 0
+            parts = parts.split(DS)
+            var up = 0;
+            for (var i = parts.length - 1; i >= 0; i--) {
+                var last = parts[i];
+                if (last === '.') {
+                    spliceOne(parts, i);
+                } else if (last === '..') {
+                    spliceOne(parts, i);
+                    up++;
+                } else if (up) {
+                    spliceOne(parts, i);
+                    up--;
+                }
+            }
+            // if the path is allowed to go above the root, restore leading ..s
+            if (allowAboveRoot) {
+                for (; up--; up) {
+                    parts.unshift('..');
+                }
+            }
+            return parts;
+        }
+        //===========================
+        function normalizeArray2(parts, allowAboveRoot) {
+            // if the path tries to go above the root, `up` ends up > 0
+            parts = parts.split(DS)
+            var up = 0;
+            for (var i = parts.length - 1; i >= 0; i--) {
+                var last = parts[i];
+                if (last === '.') {
+                    parts[i] = undefined;
+                } else if (last === '..') {
+                    parts[i] = undefined;
+                    up++;
+                } else if (up) {
+                    parts[i] = undefined;
+                    up--;
+                }
+            }
+            // if the path is allowed to go above the root, restore leading ..s
+            if (allowAboveRoot) {
+                for (; up--; up) {
+                    parts.unshift('..');
+                }
+            }
+            var newArray = [];
+            var length = parts.length;
+            for (var index = 0; index < length; index++) {
+                var element = parts[index];
+                if (undefined !== element) {
+                    newArray[index] = element;
+                }
+            }
+            return newArray;
+        }
+        //===========================
+        function normalizeArray3(parts, allowAboveRoot) {
+            // if the path tries to go above the root, `up` ends up > 0
+            parts = parts.split(DS)
+            var up = 0;
+            for (var i = parts.length - 1; i >= 0; i--) {
+                var last = parts[i];
+                if (last === '.') {
+                    parts.splice(i, 1);
+                    // spliceOne(parts, i);
+                } else if (last === '..') {
+                    parts.splice(i, 1);
+                    up++;
+                } else if (up) {
+                    parts.splice(i, 1);
+                    up--;
+                }
+            }
+            // if the path is allowed to go above the root, restore leading ..s
+            if (allowAboveRoot) {
+                for (; up--; up) {
+                    parts.unshift('..');
+                }
+            }
+            return parts;
+        }
+        //===========================
+        var DS = "/";
+
+        function PathNormalize(path, allowAboveRoot) {
+            if (allowAboveRoot === void 0) {
+                allowAboveRoot = false;
+            }
+            var PathArray = path.split(DS);
+            var Up = 0; //上n级目录;
+            var NewPathArray = [];
+            for (var index = PathArray.length - 1; index >= 0; index--) {
+                var dirName = PathArray[index];
+                if (dirName == ".") {
+                    continue;
+                } else if (dirName == "..") {
+                    Up++;
+                } else {
+                    if (Up) {
+                        Up--;
+                    } else {
+                        NewPathArray.unshift(dirName);
+                    }
+                }
+            }
+            if (allowAboveRoot) {
+                while (Up) {
+                    NewPathArray.unshift("..");
+                    Up--;
+                }
+            }
+            return NewPathArray;
+            // return {PathArray:NewPathArray,Up:Up,toString:()=>NewPathArray.join(DS)};
+        }
+        //===========================
+        // var Benchmark = require('benchmark');
+        var suite = new Benchmark.Suite;
+
+        var example = "./../.././/../aa/../aa/../aa/test/right";
+        // add tests
+        suite.add('自己写： 写入新数组', function() {
+                PathNormalize(example);
+            })
+            .add('别人写： 自定义删除数组一个元素', function() {
+                normalizeArray(example);
+            })
+            .add('新数组+最后迭代判断', function() {
+                normalizeArray2(example);
+            })
+            .add('原生数组删除', function() {
+                normalizeArray3(example);
+            })
+            .on('cycle', function(event) { // add listeners
+                // document.body.innerHTML += String(event.target) + "<br/>";
+                console.log(String(event.target));
+            })
+            .on('complete', function() {
+                // document.body.innerHTML += 'Fastest is ' + this.filter('fastest').map('name') + "<br/>";
+                console.log('Fastest is ' + this.filter('fastest').map('name'));
+            })
+            .run({
+                'async': true
+            }); // run async
+    </script>
+</body>
+
+</html>
