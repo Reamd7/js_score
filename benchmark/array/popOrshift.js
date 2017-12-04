@@ -1,6 +1,6 @@
 function NewArray() {
-    var list = [];
-    for (var index = 0; index < 100001; index++) {
+    var list = new Array();
+    for (var index = 0; index < 100000; index++) {
         list.push(index);
     }
     return list

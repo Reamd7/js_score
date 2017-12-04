@@ -30,6 +30,13 @@ function VanillaJS(list, index) {
     return list
 }
 //=========================
+function newObj(){
+    return  {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8, 8: 9, 9: 0, 10: 11, 11: 212, 12: 3123, 13: 424, 14: 123123, 15: 13123, 16: 144234243, 17: 345346, 18: 1123, 19: 234234, 20: "121231,2342345,1231,123"}
+}
+function Obj(){
+    delete newObj()[10];
+}
+//==========================
 var _ = require("lodash");
 var Benchmark = require('benchmark');
 var suite = new Benchmark.Suite;
@@ -54,6 +61,9 @@ suite.add('快速删除', function() {
         _.remove(NewArray(), function(value, index) {
             return index == 10
         })
+    })
+    .add('ObjDelete', function() {
+        Obj()
     })
     .on('cycle', function(event) { // add listeners
         console.log(String(event.target));

@@ -20,7 +20,7 @@ suite.add('forEach', function() {
             array[index] += 1;
         }
     })
-    .add('for--', function() {
+    .add('for++', function() {
         var array = NewArray();
         var len = array.length;
         for (var index = 0; index < len; index++) {
